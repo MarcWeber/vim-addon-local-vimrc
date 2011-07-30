@@ -1,0 +1,14 @@
+configuration, these are defaults:
+let g:local_vimrc = {'names':['.localrc'],'hash_fun':'LVRHashOfFile'}
+
+Features:
+- When Vim starts up current directory up to root is traversed and special
+  files such as .local-vimrc files are sourced
+
+- For security reasons a checksum is calculated before doing so. You're asked
+  for confirmation only if that changes.
+
+KISS: If you need filetype support write au commands into the local vimrc.
+
+Yes I know that there are already a couple of existing similar plugins.
+But I they work for filetypes only (why?) and they don't verify file contents.
