@@ -1,9 +1,15 @@
 " vam#DefineAndBind('s:c','g:local_vimrc','{}')
 if !exists('g:local_vimrc') | let g:local_vimrc = {} | endif | let s:c = g:local_vimrc
-let s:c.names = get(s:c,'names',['.localrc'])
+
+" using .vimrc because most systems support local and user global
+" configuration files. They rarely differ in name.
+" Users will instantly understand what it does.
+let s:c.names = get(s:c,'names',['.vimrc'])
+
 let s:c.hash_fun = get(s:c,'hash_fun','LVRHashOfFile')
 let s:c.cache_file = get(s:c,'cache_file', $HOME.'/.vim_local_rc_cache')
 
+" very simple hash function using md5 falling back to VimL implementation
 fun! LVRHashOfFile(file, seed)
   if executable('md5')
     return system('md5 '.shellescape(a:file))
@@ -18,6 +24,7 @@ fun! LVRHashOfFile(file, seed)
   endif
 endfun
 
+" source local vimrc, ask user for confirmation if file contents change
 fun! LVRSource(file, cache)
   let p = expand(a:file)
   let h = call(function(s:c.hash_fun), [a:file, a:cache.seed])
@@ -28,6 +35,7 @@ fun! LVRSource(file, cache)
   endif
 endf
 
+" find all local .vimrc in parent directories
 fun! LVRRecurseUp(dir, names)
   " for each computer use different unique seed based on time so that its
   " horder to find collisions
