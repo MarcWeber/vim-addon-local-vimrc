@@ -26,6 +26,9 @@ endfun
 
 " source local vimrc, ask user for confirmation if file contents change
 fun! LVRSource(file, cache)
+  " always ignore user global .vimrc which Vim sources on startup:
+  if expand(a:file) == expand("~/.vimrc") | return | endif
+
   let p = expand(a:file)
   let h = call(function(s:c.hash_fun), [a:file, a:cache.seed])
   " if hash doesn't match or no hash exists ask user to confirm sourcing this file
@@ -48,7 +51,7 @@ fun! LVRRecurseUp(dir, names)
     while 1
       let f = findfile(n, ".;", nr)
       if f == '' | break | endif
-      call LVRSource(f, cache)
+      call LVRSource(fnamemodify(f,':p'), cache)
       let nr += 1
     endwhile
   endfor
