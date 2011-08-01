@@ -18,6 +18,9 @@ augroup LOCAL_SETUP
 
   " for php use tab as indentation character. Display a tab as 4 spaces:
   autocmd BufRead,BufNewFile *.php set noexpandtab| set tabstop=4 | set sw=4
+
+  " hint: for indentation settings modelines can be an alternative as well as
+  " various plugins trying to set vim's indentation based on file contents.
 augroup end
 
 
