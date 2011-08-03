@@ -5,8 +5,9 @@ Features:
 - When Vim starts up current directory up to root is traversed and special
   files such as .local-vimrc files are sourced
 
-- For security reasons a checksum is calculated before doing so. You're asked
-  for confirmation only if that changes.
+- Because you don't want to run untrusted code by accident this plugin
+  calculates a hash before sourcing. If its unkown you must confirm sourcing
+  the file. The hash is updated automatcially if you write a local vim file.
 
 
 Sample RC

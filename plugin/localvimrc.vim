@@ -38,24 +38,40 @@ fun! LVRSource(file, cache)
   endif
 endf
 
-" find all local .vimrc in parent directories
-fun! LVRRecurseUp(dir, names)
+fun! LVRWithCache(F, args)
   " for each computer use different unique seed based on time so that its
   " horder to find collisions
   let cache = filereadable(s:c.cache_file)
         \ ? eval(readfile(s:c.cache_file)[0])
         \ : {'seed':localtime()}
   let c = copy(cache)
+  let r = call(a:F, [cache]+a:args)
+  if c != cache | call writefile([string(cache)], s:c.cache_file) | endif
+  return r
+endf
+
+" find all local .vimrc in parent directories
+fun! LVRRecurseUp(cache, dir, names)
   for n in a:names
     let nr = 1
     while 1
       let f = findfile(n, ".;", nr)
       if f == '' | break | endif
-      call LVRSource(fnamemodify(f,':p'), cache)
+      call LVRSource(fnamemodify(f,':p'), a:cache)
       let nr += 1
     endwhile
   endfor
-  if c != cache | call writefile([string(cache)], s:c.cache_file) | endif
 endf
 
-call LVRRecurseUp(getcwd(), s:c.names)
+" find and source files on vim startup:
+call LVRWithCache('LVRRecurseUp', [getcwd(), s:c.names] )
+
+" if its you writing a file update hash automatically
+fun! LVRUpdateCache(cache)
+  let f = expand('%:p')
+  let a:cache[f] = call(function(s:c.hash_fun), [f, a:cache.seed])
+endf
+
+augroup LOCAL_VIMRC
+  autocmd BufWritePost * if index(s:c.names, expand('%:t')) >= 0 | call LVRWithCache('LVRUpdateCache', [] ) | endif
+augroup end
