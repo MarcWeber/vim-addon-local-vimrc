@@ -1,5 +1,5 @@
 configuration, these are defaults:
-let g:local_vimrc = {'names':['.localrc'],'hash_fun':'LVRHashOfFile'}
+let g:local_vimrc = {'names':['.vimrc'],'hash_fun':'LVRHashOfFile'}
 
 Features:
 - When Vim starts up current directory up to root is traversed and special
@@ -9,9 +9,13 @@ Features:
   calculates a hash before sourcing. If its unkown you must confirm sourcing
   the file. The hash is updated automatcially if you write a local vim file.
 
+USAGE:
+========
+create a .vimrc in your project directory and add
+echoe "this file is being soucred by vim"
 
-Sample RC
-=========
+Sample local .vimrc
+===================
 
 augroup LOCAL_SETUP
   " using vim-addon-sql providing alias aware SQL completion for .sql files and PHP:
