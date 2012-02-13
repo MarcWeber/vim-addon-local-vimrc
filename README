@@ -41,4 +41,5 @@ alternatives
 directory local .vimrc without walking up directory tree using vim builtin 'exrc' option:
   :h 'exrc'
   :h 'secure'
-but 'secure' is not very secure, eg echo system('cat .vimrc') is executed.
+but 'secure' is not very secure, eg echo system('cat .vimrc') is executed
+unless the file belongs to a different owner..
