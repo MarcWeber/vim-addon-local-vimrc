@@ -7,7 +7,7 @@ Features:
 
 - Because you don't want to run untrusted code by accident this plugin
   calculates a hash before sourcing. If its unkown you must confirm sourcing
-  the file. The hash is updated automatcially if you write a local vim file.
+  the file. The hash is updated automatcially if you write a local vimrc file.
 
 USAGE:
 ========
@@ -22,7 +22,8 @@ augroup LOCAL_SETUP
   autocmd BufRead,BufNewFile *.sql,*.php call vim_addon_sql#Connect('mysql',{'database':'DATABASE', 'user':'USER', 'password' : 'PASSWORD'})
 
   " for php use tab as indentation character. Display a tab as 4 spaces:
-  autocmd BufRead,BufNewFile *.php set noexpandtab| set tabstop=4 | set sw=4
+  " autocmd BufRead,BufNewFile *.php set noexpandtab| set tabstop=4 | set sw=4
+  autocmd FileType php setlocal noexpandtab| setlocal tabstop=4 | setlocal sw=4
 
   " hint: for indentation settings modelines can be an alternative as well as
   " various plugins trying to set vim's indentation based on file contents.
