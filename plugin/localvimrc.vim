@@ -11,8 +11,8 @@ let s:c.cache_file = get(s:c,'cache_file', $HOME.'/.vim_local_rc_cache')
 
 " very simple hash function using md5 falling back to VimL implementation
 fun! LVRHashOfFile(file, seed)
-  if executable('md5')
-    return system('md5 '.shellescape(a:file))
+  if executable('md5sum')
+    return system('md5sum '.shellescape(a:file))
   else
     let s = join(readfile(a:file,"\n"))
     " poor mans hash function. I don't expect it to be very secure.
