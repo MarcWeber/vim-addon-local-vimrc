@@ -52,15 +52,17 @@ endf
 
 " find all local .vimrc in parent directories
 fun! LVRRecurseUp(cache, dir, names)
+  let files = []
   for n in a:names
     let nr = 1
     while 1
       let f = findfile(n, ".;", nr)
       if f == '' | break | endif
-      call LVRSource(fnamemodify(f,':p'), a:cache)
+      call add(files, fnamemodify(f,':p'))
       let nr += 1
     endwhile
   endfor
+  call map(reverse(files), 'LVRSource(v:val, a:cache)')
 endf
 
 " find and source files on vim startup:

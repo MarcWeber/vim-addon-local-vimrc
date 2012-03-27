@@ -3,7 +3,7 @@ let g:local_vimrc = {'names':['.vimrc'],'hash_fun':'LVRHashOfFile'}
 
 Features:
 - When Vim starts up current directory up to root is traversed and special
-  files such as .local-vimrc files are sourced
+  files such as .(local-)vimrc files are sourced
 
 - Because you don't want to run untrusted code by accident this plugin
   calculates a hash before sourcing. If its unkown you must confirm sourcing
