@@ -12,7 +12,7 @@ Features:
 USAGE:
 ========
 create a .vimrc in your project directory.
-To make sure it's working, add: echo "this file is being soucred by vim"
+To make sure it's working, add: echo "this file is being sourced by vim"
 
 Sample local .vimrc
 ===================
