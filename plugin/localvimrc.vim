@@ -90,5 +90,8 @@ endf
 
 augroup LOCAL_VIMRC
   autocmd BufWritePost * if index(s:c.names, expand('%:t')) >= 0 | call LVRWithCache('LVRUpdateCache', [] ) | endif
-  autocmd BufNewFile,BufRead * call LVRCwdCache()
+  " Only activate if autochdir is not set
+  if ! &autochdir 
+    autocmd BufNewFile,BufRead * call LVRCwdCache()
+  endif
 augroup end
