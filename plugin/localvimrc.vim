@@ -69,7 +69,13 @@ fun! LVRRecurseUp(cache, dir, names)
 endf
 
 " find and source files on vim startup:
-call LVRWithCache('LVRRecurseUp', [getcwd(), s:c.names] )
+command! SourceLocalVimrc call LVRWithCache('LVRRecurseUp', [getcwd(), s:c.names] )
+command! SourceLocalVimrcOnce
+    \ if s:c.resource_on_cwd_change && s:last_cwd != getcwd()
+    \ | call LVRWithCache('LVRRecurseUp', [getcwd(), s:c.names] )
+    \ | endif
+
+SourceLocalVimrcOnce
 
 " if its you writing a file update hash automatically
 fun! LVRUpdateCache(cache)
@@ -87,9 +93,6 @@ augroup LOCAL_VIMRC
   " directory - so this is only an approximation to what people might expect.
   " Idle events and the like would be an alternative
   if ! &autochdir
-    autocmd BufNewFile,BufRead *
-          \ if s:c.resource_on_cwd_change && s:last_cwd != getcwd()
-          \ | call LVRWithCache('LVRRecurseUp', [getcwd(), s:c.names] )
-          \ | endif
+    autocmd BufNewFile,BufRead * SourceLocalVimrcOnce
   endif
 augroup end
