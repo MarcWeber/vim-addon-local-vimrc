@@ -8,6 +8,7 @@ let s:c.names = get(s:c,'names',['.vimrc'])
 
 let s:c.hash_fun = get(s:c,'hash_fun','LVRHashOfFile')
 let s:c.cache_file = get(s:c,'cache_file', $HOME.'/.vim_local_rc_cache')
+let s:last_cwd = ''
 
 " very simple hash function using md5 falling back to VimL implementation
 fun! LVRHashOfFile(file, seed)
@@ -50,6 +51,19 @@ fun! LVRWithCache(F, args)
   return r
 endf
 
+fun! LVRCwdCache()
+  " This searches/sources the local vimrc once per current working directory,
+  " so it can be be used with BufNewFile/BufRead efficienty, making it
+  " compatible with normal gvim or sessionman usage (which wont normally be
+  " started project working directory.). It also lets the user to switch 
+  " projects by simply changing to a new directory and opening a file.
+  let cwd = getcwd()
+  if s:last_cwd != cwd
+    let s:last_cwd = cwd
+    call LVRWithCache('LVRRecurseUp', [cwd, s:c.names] )
+  endif
+endfun
+
 " find all local .vimrc in parent directories
 fun! LVRRecurseUp(cache, dir, names)
   let files = []
@@ -76,4 +90,8 @@ endf
 
 augroup LOCAL_VIMRC
   autocmd BufWritePost * if index(s:c.names, expand('%:t')) >= 0 | call LVRWithCache('LVRUpdateCache', [] ) | endif
+  " Only activate if autochdir is not set
+  if ! &autochdir 
+    autocmd BufNewFile,BufRead * call LVRCwdCache()
+  endif
 augroup end
