@@ -1,20 +1,20 @@
-configuration, these are defaults:
+Configuration: these are the defaults:
 let g:local_vimrc = {'names':['.vimrc'],'hash_fun':'LVRHashOfFile'}
 
 Features:
-- When Vim starts up current directory up to root is traversed and special
-  files such as .(local-)vimrc files are sourced
+- When Vim starts up, every directory from root to the directory of the file
+  is traversed and special files such as .(local-)vimrc files are sourced
 
-- Because you don't want to run untrusted code by accident this plugin
-  calculates a hash before sourcing. If its unkown you must confirm sourcing
-  the file. The hash is updated automatcially if you write a local vimrc file.
+- Because you don't want to run untrusted code by accident, this plugin
+  calculates a hash before sourcing. If its unknown you must confirm sourcing
+  the file. The hash is updated automatically if you write a local vimrc file.
 
 - if you change a directory and edit a file the local vimrc files are resourced
 
 USAGE:
 ========
-create a .vimrc in your project directory and add
-echoe "this file is being soucred by vim"
+create a .vimrc in your project directory.
+To make sure it's working, add: echo "this file is being sourced by vim"
 
 Sample local .vimrc
 ===================
@@ -38,7 +38,7 @@ Yes I know that there are already a couple of existing similar plugins.
 But I they work for filetypes only (why?) and they don't verify file contents.
 
 
-alternatives
+Alternatives
 ============
 directory local .vimrc without walking up directory tree using vim builtin 'exrc' option:
   :h 'exrc'
