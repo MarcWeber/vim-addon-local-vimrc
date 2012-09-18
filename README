@@ -9,6 +9,8 @@ Features:
   calculates a hash before sourcing. If its unkown you must confirm sourcing
   the file. The hash is updated automatcially if you write a local vimrc file.
 
+- if you change a directory and edit a file the local vimrc files are resourced
+
 USAGE:
 ========
 create a .vimrc in your project directory and add
@@ -43,3 +45,7 @@ directory local .vimrc without walking up directory tree using vim builtin 'exrc
   :h 'secure'
 but 'secure' is not very secure, eg echo system('cat .vimrc') is executed
 unless the file belongs to a different owner..
+
+contributors
+============
+Thiago de Arruda (github.com/tarruba)

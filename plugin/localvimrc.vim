@@ -8,6 +8,8 @@ let s:c.names = get(s:c,'names',['.vimrc'])
 
 let s:c.hash_fun = get(s:c,'hash_fun','LVRHashOfFile')
 let s:c.cache_file = get(s:c,'cache_file', $HOME.'/.vim_local_rc_cache')
+let s:c.resource_on_cwd_change = get(s:c, 'resource_on_cwd_change', 1)
+let s:last_cwd = ''
 
 " very simple hash function using md5 falling back to VimL implementation
 fun! LVRHashOfFile(file, seed)
@@ -40,7 +42,7 @@ endf
 
 fun! LVRWithCache(F, args)
   " for each computer use different unique seed based on time so that its
-  " horder to find collisions
+  " harder to find collisions
   let cache = filereadable(s:c.cache_file)
         \ ? eval(readfile(s:c.cache_file)[0])
         \ : {'seed':localtime()}
@@ -52,6 +54,7 @@ endf
 
 " find all local .vimrc in parent directories
 fun! LVRRecurseUp(cache, dir, names)
+  let s:last_cwd = a:dir
   let files = []
   for n in a:names
     let nr = 1
@@ -75,5 +78,18 @@ fun! LVRUpdateCache(cache)
 endf
 
 augroup LOCAL_VIMRC
+  " If the current file is a local .vimrc file and you're writing it
+  " automatically update the cache
   autocmd BufWritePost * if index(s:c.names, expand('%:t')) >= 0 | call LVRWithCache('LVRUpdateCache', [] ) | endif
+
+  " If autochdir is not set, then resource local vimrc files if current
+  " directory has changed. There is no event for signaling change of current
+  " directory - so this is only an approximation to what people might expect.
+  " Idle events and the like would be an alternative
+  if ! &autochdir
+    autocmd BufNewFile,BufRead *
+          \ if s:c.resource_on_cwd_change && s:last_cwd != getcwd()
+          \ | call LVRWithCache('LVRRecurseUp', [getcwd(), s:c.names] )
+          \ | endif
+  endif
 augroup end
