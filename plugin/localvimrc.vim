@@ -75,8 +75,6 @@ command! SourceLocalVimrcOnce
     \ | call LVRWithCache('LVRRecurseUp', [getcwd(), s:c.names] )
     \ | endif
 
-SourceLocalVimrcOnce
-
 " if its you writing a file update hash automatically
 fun! LVRUpdateCache(cache)
   let f = expand('%:p')
@@ -93,6 +91,6 @@ augroup LOCAL_VIMRC
   " directory - so this is only an approximation to what people might expect.
   " Idle events and the like would be an alternative
   if ! &autochdir
-    autocmd BufNewFile,BufRead * SourceLocalVimrcOnce
+    autocmd VimEnter,BufNewFile,BufRead * SourceLocalVimrcOnce
   endif
 augroup end
