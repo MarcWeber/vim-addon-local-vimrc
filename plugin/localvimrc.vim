@@ -59,7 +59,12 @@ fun! LVRRecurseUp(cache, dir, names)
   for n in a:names
     let nr = 1
     while 1
-      let f = findfile(n, ".;", nr)
+      " ".;" does not work in the "vim ." case - why?
+      " Thanks to github.com/jdonaldson (Justin Donaldso) for finding this issue
+      " The alternative fix would be calling SourceLocalVimrcOnce
+      " at VimEnter, however I feel that you cannot setup additional VimEnter
+      " commands then - thus preferring getcwd()
+      let f = findfile(n, getcwd().";", nr)
       if f == '' | break | endif
       call add(files, fnamemodify(f,':p'))
       let nr += 1
