@@ -64,7 +64,7 @@ fun! LVRRecurseUp(cache, dir, names)
       " The alternative fix would be calling SourceLocalVimrcOnce
       " at VimEnter, however I feel that you cannot setup additional VimEnter
       " commands then - thus preferring getcwd()
-      let f = findfile(n, getcwd().";", nr)
+      let f = findfile(n, escape(getcwd(), "\ ").";", nr)
       if f == '' | break | endif
       call add(files, fnamemodify(f,':p'))
       let nr += 1
