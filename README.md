@@ -1,5 +1,10 @@
+vim-addon-local-vimrc
+======================
+
 Configuration: these are the defaults:
+```vim
 let g:local_vimrc = {'names':['.vimrc'],'hash_fun':'LVRHashOfFile'}
+```
 
 Features:
 - When Vim starts up, every directory from root to the directory of the file
@@ -19,6 +24,7 @@ To make sure it's working, add: echo "this file is being sourced by vim"
 Sample local .vimrc
 ===================
 
+```vim
 augroup LOCAL_SETUP
   " using vim-addon-sql providing alias aware SQL completion for .sql files and PHP:
   autocmd BufRead,BufNewFile *.sql,*.php call vim_addon_sql#Connect('mysql',{'database':'DATABASE', 'user':'USER', 'password' : 'PASSWORD'})
@@ -30,6 +36,7 @@ augroup LOCAL_SETUP
   " hint: for indentation settings modelines can be an alternative as well as
   " various plugins trying to set vim's indentation based on file contents.
 augroup end
+```
 
 
 KISS: If you need filetype support write au commands into the local vimrc.
