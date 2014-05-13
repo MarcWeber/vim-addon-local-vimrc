@@ -41,15 +41,12 @@ endfun
 
 fun! LVRSaveAnswer(cache, key, hash, ans)
   if 'ANS_ALWAYS' == a:ans || 'ANS_NEVER' == a:ans
-    let ce = {'hash': a:hash, 'ans': a:ans}
-    let a:cache[a:key] = ce
+    let l:ans = a:ans
   else
-    " user doesn't want answer saved; delete the cache entry entirely
-    " N.B.: "unlet!" doesn't suppress missing-key error :-(, so instead
-    " we make sure the entry is defined before undefining it
-    let a:cache[a:key] = {}
-    unlet a:cache[a:key]
+    let l:ans = 'ANS_ASK'
   endif
+  let ce = {'hash': a:hash, 'ans': l:ans}
+  let a:cache[a:key] = ce
 endf
 
 " source local vimrc, ask user for confirmation if file contents change
@@ -61,7 +58,7 @@ fun! LVRSource(file, cache)
   let h = call(function(s:c.hash_fun), [a:file, a:cache.seed])
   " if hash doesn't match or no hash exists ask user to confirm sourcing this file
   let ce = get(a:cache, p, {'hash':'no-hash', 'ans':'ANS_NO'})
-  if ce['hash'] == h
+  if ce['hash'] == h && ce['ans'] != 'ANS_ASK'
     let ans = ce['ans']
   else
     let ans = LVRAsk('source '.p,'ANS_NO')
