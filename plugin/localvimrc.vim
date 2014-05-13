@@ -10,6 +10,7 @@ let s:c.hash_fun = get(s:c,'hash_fun','LVRHashOfFile')
 let s:c.cache_file = get(s:c,'cache_file', $HOME.'/.vim_local_rc_cache')
 let s:c.resource_on_cwd_change = get(s:c, 'resource_on_cwd_change', 1)
 let s:last_cwd = ''
+let s:answer_map = ['ANS_GOK', 'ANS_YES', 'ANS_NO', 'ANS_ALWAYS', 'ANS_NEVER']
 
 " very simple hash function using md5 falling back to VimL implementation
 fun! LVRHashOfFile(file, seed)
@@ -26,6 +27,17 @@ fun! LVRHashOfFile(file, seed)
   endif
 endfun
 
+" Ask the user; return one of the ANS_* strings.
+" If they don't provide a useful answer, return dflt.
+fun! LVRAsk(prompt, dflt)
+    let ans = confirm(a:prompt,"&Yes\n&No\n&Always\nNe&Ver", a:dflt)
+    if 0 < ans
+      return s:answer_map[ans]
+    else
+      return dflt
+    endif
+endfun
+
 " source local vimrc, ask user for confirmation if file contents change
 fun! LVRSource(file, cache)
   " always ignore user global .vimrc which Vim sources on startup:
@@ -34,9 +46,26 @@ fun! LVRSource(file, cache)
   let p = expand(a:file)
   let h = call(function(s:c.hash_fun), [a:file, a:cache.seed])
   " if hash doesn't match or no hash exists ask user to confirm sourcing this file
-  if get(a:cache, p, 'no-hash') == h || 1 == confirm('source '.p,"&Y\n&n",2)
-    let a:cache[p] = h
+  let ce = get(a:cache, p, {'hash':'no-hash', 'ans':'ANS_NO'})
+  if ce['hash'] == h
+    let ans = ce['ans']
+  else
+    let ans = LVRAsk('source '.p,'ANS_NO')
+  endif
+  " source the file if so requested
+  if 'ANS_YES' == ans || 'ANS_ALWAYS' == ans
     exec 'source '.fnameescape(p)
+  endif
+  " update the cache
+  if 'ANS_ALWAYS' == ans || 'ANS_NEVER' == ans
+    let ce = {'hash': h, 'ans': ans}
+    let a:cache[p] = ce
+  else
+    " user doesn't want answer saved; delete the cache entry entirely
+    " N.B.: "!" doesn't suppress missing-key error from "unlet" :-(,
+    " so we make sure the entry is defined before nuking it
+    let a:cache[p] = {}
+    unlet a:cache[p]
   endif
 endf
 

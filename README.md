@@ -11,8 +11,25 @@ Features:
   is traversed and special files such as .(local-)vimrc files are sourced
 
 - Because you don't want to run untrusted code by accident, this plugin
-  calculates a hash before sourcing. If its unknown you must confirm sourcing
-  the file. The hash is updated automatically if you write a local vimrc file.
+  calculates a asks you before sourcing any given file, and optionally
+  remembers your answer for the future.  Possible answers are (with the
+  abbreviation captitalized):
+
+    - `Yes`: Read the file this time, but do not remember the answer;
+       you will be asked again next time
+
+    - `No`: Don't read it, and don't remember the answer
+
+    - `Always`: Read the file this time, and automatically do so from now on
+
+    - `neVer`: Don't read it, and don't ask again in future
+  
+- It also remembers a hash of the file's contents, so that if the file
+  changes, you'll be asked again.
+
+  If you use vim to edit a local vimrc file, an answer of "Always" is
+  automatically saved for (that version of) the file, on the theory
+  that you trust any edits you yourself have made.
 
 - if you change a directory and edit a file the local vimrc files are resourced
 
