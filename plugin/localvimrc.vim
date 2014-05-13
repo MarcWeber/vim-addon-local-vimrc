@@ -38,6 +38,19 @@ fun! LVRAsk(prompt, dflt)
     endif
 endfun
 
+fun! LVRSaveAnswer(cache, key, hash, ans)
+  if 'ANS_ALWAYS' == a:ans || 'ANS_NEVER' == a:ans
+    let ce = {'hash': a:hash, 'ans': a:ans}
+    let a:cache[a:key] = ce
+  else
+    " user doesn't want answer saved; delete the cache entry entirely
+    " N.B.: "unlet!" doesn't suppress missing-key error :-(, so instead
+    " we make sure the entry is defined before undefining it
+    let a:cache[a:key] = {}
+    unlet a:cache[a:key]
+  endif
+endf
+
 " source local vimrc, ask user for confirmation if file contents change
 fun! LVRSource(file, cache)
   " always ignore user global .vimrc which Vim sources on startup:
@@ -56,17 +69,7 @@ fun! LVRSource(file, cache)
   if 'ANS_YES' == ans || 'ANS_ALWAYS' == ans
     exec 'source '.fnameescape(p)
   endif
-  " update the cache
-  if 'ANS_ALWAYS' == ans || 'ANS_NEVER' == ans
-    let ce = {'hash': h, 'ans': ans}
-    let a:cache[p] = ce
-  else
-    " user doesn't want answer saved; delete the cache entry entirely
-    " N.B.: "!" doesn't suppress missing-key error from "unlet" :-(,
-    " so we make sure the entry is defined before nuking it
-    let a:cache[p] = {}
-    unlet a:cache[p]
-  endif
+  call LVRSaveAnswer(a:cache, p, h, ans)
 endf
 
 fun! LVRWithCache(F, args)
@@ -114,7 +117,8 @@ SourceLocalVimrcOnce
 " if its you writing a file update hash automatically
 fun! LVRUpdateCache(cache)
   let f = expand('%:p')
-  let a:cache[f] = call(function(s:c.hash_fun), [f, a:cache.seed])
+  call LVRSaveAnswer(a:cache, f, call(function(s:c.hash_fun), [f, a:cache.seed]),
+    \ 'ANS_ALWAYS')
 endf
 
 augroup LOCAL_VIMRC
