@@ -10,8 +10,26 @@ let s:c.hash_fun = get(s:c,'hash_fun','LVRHashOfFile')
 let s:c.cache_file = get(s:c,'cache_file', $HOME.'/.vim_local_rc_cache')
 let s:c.resource_on_cwd_change = get(s:c, 'resource_on_cwd_change', 1)
 let s:last_cwd = ''
-let s:answer_map = ['ANS_GOK', 'ANS_YES', 'ANS_NO', 'ANS_ALWAYS', 'ANS_NEVER']
 let s:cache_format_version=2		" Increment this on any format change
+
+"            read     ask again
+" Value      file     next time [1]
+" -----      ----     -------------
+" ANS_YES    yes         no
+" ANS_ONCE   yes         yes
+" ANS_NO     no          yes
+" ANS_NEVER  no          no
+" ANS_ASK[2] (n/a)       yes
+"
+" [1] Yes: the next time this file is a candidate to be run, the user
+"          will be asked again whether to actually run it
+"     No:  User's answer will be cached, and applied automatically in
+"          future (until the file's hash changes)
+"
+" [2] ANS_ASK is used internally; it doesn't correspond directly to
+"     any one of the options offered to the user
+
+let s:answer_map = ['ANS_NO', 'ANS_YES', 'ANS_ONCE', 'ANS_NO', 'ANS_NEVER']
 
 " very simple hash function using md5 falling back to VimL implementation
 fun! LVRHashOfFile(file, seed)
@@ -31,7 +49,7 @@ endfun
 " Ask the user; return one of the ANS_* strings.
 " If they don't provide a useful answer, return dflt.
 fun! LVRAsk(prompt, dflt)
-    let ans = confirm(a:prompt,"&Yes\n&No\n&Always\nNe&Ver", a:dflt)
+    let ans = confirm(a:prompt,"&Yes\n&Once\n&No\nne&Ver", a:dflt)
     if 0 < ans
       return s:answer_map[ans]
     else
@@ -40,7 +58,7 @@ fun! LVRAsk(prompt, dflt)
 endfun
 
 fun! LVRSaveAnswer(cache, key, hash, ans)
-  if 'ANS_ALWAYS' == a:ans || 'ANS_NEVER' == a:ans
+  if 'ANS_YES' == a:ans || 'ANS_NEVER' == a:ans
     let l:ans = a:ans
   else
     let l:ans = 'ANS_ASK'
@@ -64,7 +82,7 @@ fun! LVRSource(file, cache)
     let ans = LVRAsk('source '.p,'ANS_NO')
   endif
   " source the file if so requested
-  if 'ANS_YES' == ans || 'ANS_ALWAYS' == ans
+  if 'ANS_YES' == ans || 'ANS_ONCE' == ans
     exec 'source '.fnameescape(p)
   endif
   call LVRSaveAnswer(a:cache, p, h, ans)

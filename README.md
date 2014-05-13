@@ -15,14 +15,13 @@ Features:
   remembers your answer for the future.  Possible answers are (with the
   abbreviation captitalized):
 
-    - `Yes`: Read the file this time, but do not remember the answer;
-       you will be asked again next time
+    -  *Yes*: Read the file from now on, without asking
 
-    - `No`: Don't read it, and don't remember the answer
+    - `*Once*: Read the file this time, but ask again next time
 
-    - `Always`: Read the file this time, and automatically do so from now on
+    - `*No*: Don't read it this time, but ask again next time
 
-    - `neVer`: Don't read it, and don't ask again in future
+    - `*neVer*: Don't read it, now or ever
   
 - It also remembers a hash of the file's contents, so that if the file
   changes, you'll be asked again.
