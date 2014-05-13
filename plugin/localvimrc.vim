@@ -11,6 +11,7 @@ let s:c.cache_file = get(s:c,'cache_file', $HOME.'/.vim_local_rc_cache')
 let s:c.resource_on_cwd_change = get(s:c, 'resource_on_cwd_change', 1)
 let s:last_cwd = ''
 let s:answer_map = ['ANS_GOK', 'ANS_YES', 'ANS_NO', 'ANS_ALWAYS', 'ANS_NEVER']
+let s:cache_format_version=2		" Increment this on any format change
 
 " very simple hash function using md5 falling back to VimL implementation
 fun! LVRHashOfFile(file, seed)
@@ -77,8 +78,16 @@ fun! LVRWithCache(F, args)
   " harder to find collisions
   let cache = filereadable(s:c.cache_file)
         \ ? eval(readfile(s:c.cache_file)[0])
-        \ : {'seed':localtime()}
+        \ : {}
   let c = copy(cache)
+  " if the cache isn't in the format we understand, just blow it away;
+  " it's not valuable enough to be worth converting.
+  " note that we do this whether the file's version is too low or too high;
+  " in either case, we assume that we don't know how to interpret the contents.
+  let ver = get(cache, 'format_version', -1)	" default should never match any real version number
+  if ver != s:cache_format_version
+    let cache = {'seed' : localtime(), 'format_version' : s:cache_format_version}
+  endif
   let r = call(a:F, [cache]+a:args)
   if c != cache | call writefile([string(cache)], s:c.cache_file) | endif
   return r
