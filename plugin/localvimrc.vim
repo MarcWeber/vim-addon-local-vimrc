@@ -10,8 +10,15 @@ let s:c.hash_fun = get(s:c,'hash_fun','LVRHashOfFile')
 let s:c.cache_file = get(s:c,'cache_file', $HOME.'/.vim_local_rc_cache')
 let s:c.resource_on_cwd_change = get(s:c, 'resource_on_cwd_change', 1)
 let s:last_cwd = ''
-let s:answer_map = ['ANS_GOK', 'ANS_YES', 'ANS_NO', 'ANS_ALWAYS', 'ANS_NEVER']
-let s:cache_format_version=2		" Increment this on any format change
+let s:cache_format_version=2            " Increment this on any format change
+
+" Map return values from confirm() into our answer codes.
+" If confirm() can't provide a good answer, it returns 0; hence we set
+" [0] to a safe default.
+"
+" Besides these, there's also ANS_ASK, which is only used internally;
+" it's written to the cache if the user gives a non-sticky answer.
+let s:answer_map = ['ANS_NO', 'ANS_YES', 'ANS_NO', 'ANS_ALWAYS', 'ANS_NEVER']
 
 " very simple hash function using md5 falling back to VimL implementation
 fun! LVRHashOfFile(file, seed)
@@ -79,9 +86,9 @@ fun! LVRWithCache(F, args)
   let c = copy(cache)
   " if the cache isn't in the format we understand, just blow it away;
   " it's not valuable enough to be worth converting.
-  " note that we do this whether the file's version is too low or too high;
+  " note that we do this whether the file's version is too low *or* too high;
   " in either case, we assume that we don't know how to interpret the contents.
-  let ver = get(cache, 'format_version', -1)	" default should never match any real version number
+  let ver = get(cache, 'format_version', -1)    " default should never match any real version number
   if ver != s:cache_format_version
     let cache = {'seed' : localtime(), 'format_version' : s:cache_format_version}
   endif
