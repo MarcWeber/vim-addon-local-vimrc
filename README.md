@@ -10,9 +10,25 @@ Features:
 - When Vim starts up, every directory from root to the directory of the file
   is traversed and special files such as .(local-)vimrc files are sourced
 
-- Because you don't want to run untrusted code by accident, this plugin
-  calculates a hash before sourcing. If its unknown you must confirm sourcing
-  the file. The hash is updated automatically if you write a local vimrc file.
+- Because you don't want to run untrusted code by accident, this plugin asks
+  you before sourcing any given file.  Your answer can optionally be "sticky",
+  i.e. saved for use in the future.  The possible answers (the abbreviation
+  is captitalized) are:
+
+    Answer | Read now? | Sticky?
+    :-----:|:---------:|:------:
+    Yes    | Yes       | Yes
+    Once   | Yes       | No
+    No     | No        | No
+    neVer  | No        | Yes
+
+- The plugin also stores a hash of the file's contents; if the file changes,
+  you'll be asked again, i.e. any sticky answer you gave previously will be
+  ignored
+
+- If you use vim to edit a local vimrc file, a sticky "yes" is automatically
+  saved for (that version of) the file, on the assumption that you trust any
+  edits you yourself have made
 
 - if you change a directory and edit a file the local vimrc files are resourced
 
@@ -56,3 +72,4 @@ unless the file belongs to a different owner..
 contributors
 ============
 Thiago de Arruda (github.com/tarruba)
+Eric Siegerman (github.com/esiegerman)

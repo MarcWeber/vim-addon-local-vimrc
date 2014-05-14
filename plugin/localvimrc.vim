@@ -10,6 +10,15 @@ let s:c.hash_fun = get(s:c,'hash_fun','LVRHashOfFile')
 let s:c.cache_file = get(s:c,'cache_file', $HOME.'/.vim_local_rc_cache')
 let s:c.resource_on_cwd_change = get(s:c, 'resource_on_cwd_change', 1)
 let s:last_cwd = ''
+let s:cache_format_version=2            " Increment this on any format change
+
+" Map return values from confirm() into our answer codes.
+" If confirm() can't provide a good answer, it returns 0; hence we set
+" [0] to a safe default.
+"
+" Besides these, there's also ANS_ASK, which is only used internally;
+" it's written to the cache if the user gives a non-sticky answer.
+let s:answer_map = ['ANS_NO', 'ANS_YES', 'ANS_ONCE', 'ANS_NO', 'ANS_NEVER']
 
 " very simple hash function using md5 falling back to VimL implementation
 fun! LVRHashOfFile(file, seed)
@@ -26,6 +35,27 @@ fun! LVRHashOfFile(file, seed)
   endif
 endfun
 
+" Ask the user; return one of the ANS_* strings.
+" If they don't provide a useful answer, return dflt.
+fun! LVRAsk(prompt, dflt)
+    let ans = confirm(a:prompt,"&Yes\n&Once\n&No\nne&Ver", a:dflt)
+    if 0 < ans
+      return s:answer_map[ans]
+    else
+      return dflt
+    endif
+endfun
+
+fun! LVRSaveAnswer(cache, key, hash, ans)
+  if 'ANS_YES' == a:ans || 'ANS_NEVER' == a:ans
+    let l:ans = a:ans
+  else
+    let l:ans = 'ANS_ASK'
+  endif
+  let ce = {'hash': a:hash, 'ans': l:ans}
+  let a:cache[a:key] = ce
+endf
+
 " source local vimrc, ask user for confirmation if file contents change
 fun! LVRSource(file, cache)
   " always ignore user global .vimrc which Vim sources on startup:
@@ -34,10 +64,17 @@ fun! LVRSource(file, cache)
   let p = expand(a:file)
   let h = call(function(s:c.hash_fun), [a:file, a:cache.seed])
   " if hash doesn't match or no hash exists ask user to confirm sourcing this file
-  if get(a:cache, p, 'no-hash') == h || 1 == confirm('source '.p,"&Y\n&n",2)
-    let a:cache[p] = h
+  let ce = get(a:cache, p, {'hash':'no-hash', 'ans':'ANS_NO'})
+  if ce['hash'] == h && ce['ans'] != 'ANS_ASK'
+    let ans = ce['ans']
+  else
+    let ans = LVRAsk('source '.p,'ANS_NO')
+  endif
+  " source the file if so requested
+  if 'ANS_YES' == ans || 'ANS_ONCE' == ans
     exec 'source '.fnameescape(p)
   endif
+  call LVRSaveAnswer(a:cache, p, h, ans)
 endf
 
 fun! LVRWithCache(F, args)
@@ -45,8 +82,16 @@ fun! LVRWithCache(F, args)
   " harder to find collisions
   let cache = filereadable(s:c.cache_file)
         \ ? eval(readfile(s:c.cache_file)[0])
-        \ : {'seed':localtime()}
+        \ : {}
   let c = copy(cache)
+  " if the cache isn't in the format we understand, just blow it away;
+  " it's not valuable enough to be worth converting.
+  " note that we do this whether the file's version is too low *or* too high;
+  " in either case, we assume that we don't know how to interpret the contents.
+  let ver = get(cache, 'format_version', -1)    " default should never match any real version number
+  if ver != s:cache_format_version
+    let cache = {'seed' : localtime(), 'format_version' : s:cache_format_version}
+  endif
   let r = call(a:F, [cache]+a:args)
   if c != cache | call writefile([string(cache)], s:c.cache_file) | endif
   return r
@@ -85,7 +130,8 @@ SourceLocalVimrcOnce
 " if its you writing a file update hash automatically
 fun! LVRUpdateCache(cache)
   let f = expand('%:p')
-  let a:cache[f] = call(function(s:c.hash_fun), [f, a:cache.seed])
+  call LVRSaveAnswer(a:cache, f, call(function(s:c.hash_fun), [f, a:cache.seed]),
+    \ 'ANS_ALWAYS')
 endf
 
 augroup LOCAL_VIMRC
