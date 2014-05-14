@@ -10,25 +10,14 @@ let s:c.hash_fun = get(s:c,'hash_fun','LVRHashOfFile')
 let s:c.cache_file = get(s:c,'cache_file', $HOME.'/.vim_local_rc_cache')
 let s:c.resource_on_cwd_change = get(s:c, 'resource_on_cwd_change', 1)
 let s:last_cwd = ''
-let s:cache_format_version=2		" Increment this on any format change
+let s:cache_format_version=2            " Increment this on any format change
 
-"            read     ask again
-" Value      file     next time [1]
-" -----      ----     -------------
-" ANS_YES    yes         no
-" ANS_ONCE   yes         yes
-" ANS_NO     no          yes
-" ANS_NEVER  no          no
-" ANS_ASK[2] (n/a)       yes
+" Map return values from confirm() into our answer codes.
+" If confirm() can't provide a good answer, it returns 0; hence we set
+" [0] to a safe default.
 "
-" [1] Yes: the next time this file is a candidate to be run, the user
-"          will be asked again whether to actually run it
-"     No:  User's answer will be cached, and applied automatically in
-"          future (until the file's hash changes)
-"
-" [2] ANS_ASK is used internally; it doesn't correspond directly to
-"     any one of the options offered to the user
-
+" Besides these, there's also ANS_ASK, which is only used internally;
+" it's written to the cache if the user gives a non-sticky answer.
 let s:answer_map = ['ANS_NO', 'ANS_YES', 'ANS_ONCE', 'ANS_NO', 'ANS_NEVER']
 
 " very simple hash function using md5 falling back to VimL implementation
@@ -97,9 +86,9 @@ fun! LVRWithCache(F, args)
   let c = copy(cache)
   " if the cache isn't in the format we understand, just blow it away;
   " it's not valuable enough to be worth converting.
-  " note that we do this whether the file's version is too low or too high;
+  " note that we do this whether the file's version is too low *or* too high;
   " in either case, we assume that we don't know how to interpret the contents.
-  let ver = get(cache, 'format_version', -1)	" default should never match any real version number
+  let ver = get(cache, 'format_version', -1)    " default should never match any real version number
   if ver != s:cache_format_version
     let cache = {'seed' : localtime(), 'format_version' : s:cache_format_version}
   endif
