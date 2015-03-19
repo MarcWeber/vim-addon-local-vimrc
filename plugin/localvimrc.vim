@@ -11,9 +11,15 @@ let s:c.cache_file = get(s:c,'cache_file', $HOME.'/.vim_local_rc_cache')
 let s:c.resource_on_cwd_change = get(s:c, 'resource_on_cwd_change', 1)
 let s:last_cwd = ''
 
-" very simple hash function using md5 falling back to VimL implementation
+" very simple hash function using sha2, sha1, md5 or falling back to VimL implementation
 fun! LVRHashOfFile(file, seed)
-  if executable('md5sum')
+  if executable('sha512sum')
+    return system('sha512sum '.shellescape(a:file))
+  elseif executable('sha256sum')
+    return system('sha256sum '.shellescape(a:file))
+  elseif executable('sha1sum')
+    return system('sha1sum '.shellescape(a:file))
+  elseif executable('md5sum')
     return system('md5sum '.shellescape(a:file))
   else
     let s = join(readfile(a:file,"\n"))
