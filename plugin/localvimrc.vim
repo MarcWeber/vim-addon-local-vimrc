@@ -4,26 +4,31 @@ if !exists('g:local_vimrc') | let g:local_vimrc = {} | endif | let s:c = g:local
 " using .vimrc because most systems support local and user global
 " configuration files. They rarely differ in name.
 " Users will instantly understand what it does.
-let s:c.names = get(s:c,'names',['.vimrc'])
+let s:c.names = get(s:c, 'names', ['.vimrc'])
 
 let s:c.hash_fun = get(s:c,'hash_fun','LVRHashOfFile')
 let s:c.cache_file = get(s:c,'cache_file', $HOME.'/.vim_local_rc_cache')
 let s:c.resource_on_cwd_change = get(s:c, 'resource_on_cwd_change', 1)
 let s:last_cwd = ''
+let s:c.implementations = get(s:c, 'implementations', ['sha512sum', 'sha256sum', 'sha1sum', 'md5sum', 'viml'])
 
 " very simple hash function using md5 falling back to VimL implementation
 fun! LVRHashOfFile(file, seed)
-  if executable('md5sum')
-    return system('md5sum '.shellescape(a:file))
-  else
-    let s = join(readfile(a:file,"\n"))
-    " poor mans hash function. I don't expect it to be very secure.
-    let sum = a:seed
-    for i in range(0,len(s)-1)
-      let sum = ((sum + char2nr(s[i]) * i) - i) / 2
-    endfor
-    return sum.''
-  endif
+
+  for i in s:c.implementations
+    if i == 'viml'
+      let s = join(readfile(a:file,"\n"))
+      " poor mans hash function. I don't expect it to be very secure.
+      let sum = a:seed
+      for i in range(0,len(s)-1)
+        let sum = ((sum + char2nr(s[i]) * i) - i) / 2
+      endfor
+      return sum.''
+    elseif executable(i)
+      return system(i.' '.shellescape(a:file))
+    endif
+  endfor
+  throw "no LVRHashOfFile implementation suceeded"
 endfun
 
 " source local vimrc, ask user for confirmation if file contents change
