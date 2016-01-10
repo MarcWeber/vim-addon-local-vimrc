@@ -85,7 +85,9 @@ command! SourceLocalVimrcOnce
     \ | call LVRWithCache('LVRRecurseUp', [getcwd(), s:c.names] )
     \ | endif
 
-SourceLocalVimrcOnce
+augroup localVimrc
+  au VimEnter * SourceLocalVimrcOnce
+augroup END
 
 " if its you writing a file update hash automatically
 fun! LVRUpdateCache(cache)
