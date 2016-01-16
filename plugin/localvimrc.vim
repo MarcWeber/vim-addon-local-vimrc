@@ -39,9 +39,18 @@ fun! LVRSource(file, cache)
   let p = expand(a:file)
   let h = call(function(s:c.hash_fun), [a:file, a:cache.seed])
   " if hash doesn't match or no hash exists ask user to confirm sourcing this file
-  if get(a:cache, p, 'no-hash') == h || 1 == confirm('source '.p,"&Y\n&n",2)
+  if get(a:cache, p, 'no-hash') == h
     let a:cache[p] = h
     exec 'source '.fnameescape(p)
+  else
+    let choice = confirm('source '.p,"&Yes\nNo\n&View",2)
+    if choice == 1
+      let a:cache[p] = h
+      exec 'source '.fnameescape(p)
+    elseif choice == 3
+      exec 'e '.fnameescape(p)
+      echo "Execute :SourceLocalVimrc after confirming the vimrc file is safe."
+    endif
   endif
 endf
 
