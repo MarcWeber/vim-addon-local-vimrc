@@ -5,6 +5,7 @@ if !exists('g:local_vimrc') | let g:local_vimrc = {} | endif | let s:c = g:local
 " configuration files. They rarely differ in name.
 " Users will instantly understand what it does.
 let s:c.names = get(s:c, 'names', ['.vimrc'])
+let s:c.overwriter_names = get(s:c, 'overwriter_names', ['.overwrite.vimrc'])
 
 let s:c.hash_fun = get(s:c,'hash_fun','LVRHashOfFile')
 let s:c.cache_file = get(s:c,'cache_file', $HOME.'/.vim_local_rc_cache')
@@ -105,4 +106,6 @@ augroup LOCAL_VIMRC
   if ! &autochdir
     autocmd BufNewFile,BufRead * SourceLocalVimrcOnce
   endif
+
+  autocmd VimEnter,BufNewFile,BufRead * call LVRWithCache('LVRRecurseUp', [getcwd(), s:c.overwriter_names] )
 augroup end
