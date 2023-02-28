@@ -3,8 +3,10 @@ vim-addon-local-vimrc
 
 Configuration: these are the defaults:
 ```vim
-let g:local_vimrc = {'names':['.vimrc'],'hash_fun':'LVRHashOfFile'}
+let g:local_vimrc = {'names':['.vimrc','.vimrc.lua'], 'hash_fun':'LVRHashOfFile'}
 ```
+Mind that lua files can be sourced the same way so using .vimrc.lua or similar
+should just be fine.
 
 Features:
 - When Vim starts up, every directory from root to the directory of the file
