@@ -14,7 +14,6 @@ let s:c.implementations = get(s:c, 'implementations', ['sha512sum', 'sha256sum',
 
 " very simple hash function using md5 falling back to VimL implementation
 fun! LVRHashOfFile(file, seed)
-
   for i in s:c.implementations
     if i == 'viml'
       let s = join(readfile(a:file,"\n"))
