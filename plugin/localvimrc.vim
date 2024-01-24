@@ -84,8 +84,6 @@ command! SourceLocalVimrcOnce
     \ | call LVRWithCache('LVRRecurseUp', [getcwd(), s:c.names] )
     \ | endif
 
-SourceLocalVimrcOnce
-
 " if its you writing a file update hash automatically
 fun! LVRUpdateCache(cache)
   let f = expand('%:p')
@@ -104,4 +102,6 @@ augroup LOCAL_VIMRC
   if ! &autochdir
     autocmd BufNewFile,BufRead * SourceLocalVimrcOnce
   endif
+
+  autocmd VimEnter * SourceLocalVimrcOnce
 augroup end
